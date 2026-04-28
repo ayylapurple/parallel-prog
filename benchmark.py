@@ -14,7 +14,6 @@ with open(results_file, "w", newline="") as f:
 
         print(f"\n=== SIZE {N} ===")
 
-        # один раз генерим матрицы на этот N
         subprocess.run(f"generate.exe {N} inputA.txt inputB.txt", shell=True)
 
         for p in procs_list:
@@ -30,7 +29,6 @@ with open(results_file, "w", newline="") as f:
 
             print(result.stdout)
 
-            # парсим строку TIME
             try:
                 last = result.stdout.strip().split("\n")[-1]
                 time_sec = float(last.split("TIME")[1].split("sec")[0])
