@@ -6,7 +6,6 @@
 
 using namespace std;
 
-// ================== чтение матрицы ==================
 vector<double> readMatrix(const string& filename, int& N) {
     ifstream file(filename);
 
@@ -25,7 +24,6 @@ vector<double> readMatrix(const string& filename, int& N) {
     return mat;
 }
 
-// ================== запись ==================
 void writeMatrix(const string& filename, const vector<double>& mat, int N) {
     ofstream file(filename);
 
@@ -39,7 +37,6 @@ void writeMatrix(const string& filename, const vector<double>& mat, int N) {
     }
 }
 
-// ================== main ==================
 int main(int argc, char* argv[]) {
 
     MPI_Init(&argc, &argv);
@@ -63,7 +60,6 @@ int main(int argc, char* argv[]) {
 
     vector<double> A, B, C;
 
-    // ================== ROOT ==================
     if (rank == 0) {
 
         A = readMatrix(fileA, N);
@@ -71,10 +67,8 @@ int main(int argc, char* argv[]) {
         C.resize(N * N);
     }
 
-    // broadcast N
     MPI_Bcast(&N, 1, MPI_INT, 0, MPI_COMM_WORLD);
 
-    // ================== подготовка распределения ==================
     int base = N / size;
     int rem = N % size;
 
@@ -96,7 +90,6 @@ int main(int argc, char* argv[]) {
     vector<double> localA(local_size);
     vector<double> localC(local_size, 0.0);
 
-    // ================== scatter A ==================
     MPI_Scatterv(
         rank == 0 ? A.data() : nullptr,
         sendcounts.data(),
@@ -109,17 +102,14 @@ int main(int argc, char* argv[]) {
         MPI_COMM_WORLD
     );
 
-    // ================== broadcast B ==================
     if (rank != 0)
         B.resize(N * N);
 
     MPI_Bcast(B.data(), N * N, MPI_DOUBLE, 0, MPI_COMM_WORLD);
 
-    // ================== timer ==================
     MPI_Barrier(MPI_COMM_WORLD);
     double t1 = MPI_Wtime();
 
-    // ================== local multiplication ==================
     for (int i = 0; i < local_rows; i++) {
         for (int j = 0; j < N; j++) {
 
@@ -133,7 +123,6 @@ int main(int argc, char* argv[]) {
         }
     }
 
-    // ================== gather ==================
     MPI_Gatherv(
         localC.data(),
         local_size,
@@ -149,7 +138,6 @@ int main(int argc, char* argv[]) {
     MPI_Barrier(MPI_COMM_WORLD);
     double t2 = MPI_Wtime();
 
-    // ================== output ==================
     if (rank == 0) {
 
         cout << "SIZE " << N
