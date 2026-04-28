@@ -3,7 +3,6 @@ import matplotlib.pyplot as plt
 
 data = {}
 
-# читаем CSV
 with open("mpi_full_results.csv", "r") as f:
     reader = csv.reader(f)
     next(reader)
